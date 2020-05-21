@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="bootstrap-4.4.1-dist/css/bootstrap.css">
+        <link rel="stylesheet" href="bootstrap-4.4.1-dist/css/bootstrap-grid.css">
+        <link rel="stylesheet" href="bootstrap-4.4.1-dist/css/bootstrap-select.min.css">
+        <link rel="stylesheet" href="jquery-ui.css">
+        <link rel="stylesheet" href="print.min.css">
+        <link rel="stylesheet" href="stundenerfassung.css">
+        <script src="jquery-3.4.1.min.js"></script>
+        <script src="jquery-ui.js"></script>
+        <script src="Popper.js"></script>
+        <script src="print.min.js"></script>
+        <script src="bootstrap-4.4.1-dist/js/bootstrap.js"></script>
+        <script src="bootstrap-4.4.1-dist/js/bootstrap-select.min.js"></script>
+    </head>
+    <body>
+        <div class="card text-center">
+            <div class="card-header">
+                <h3>Baustellentaetigkeit</h3>
+            </div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-3">
+                        </div>
+                        <div class="col-3">
+                            <label>Baustellenauswahl:</label>
+                        </div>
+                        <div class="col-3">
+                            <select id="baustellenauswahl" class="selectpicker" data-style="btn-primary" data-live-search="true" onchange="baustellenauswahlF();">
+                                <option id="disabledBaustellenauswahl" disabled selected="true">-- auswaehlen --</option>
+                                <option id="neueBaustelle">neue Baustelle anlegen</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <div class="row" id="baustellenButtons" style="display: none">
+                                    <button class="btn btn-danger" onclick="deleteAktuelleBaustelle();">loeschen</button>
+                                    <button class="btn btn-warning" onclick="$('#formular').modal('toggle');">drucken</button>
+                                    <button id="aktuelleBaustelleUpdaten" class="btn btn-primary" onclick="baustellenUpdateF();">speichern</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="aktuelleBaustelleForm">
+                        <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-4">
+                                <div class="row">
+                                    <div class="col-6" style="text-align: right">
+                                        <label>Name:</label>
+                                    </div>
+                                    <div class="col-6" style="text-align: left">
+                                        <input id="aktuelleBaustellenName" class="text">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6" style="text-align: right">
+                                        <label>Ort:</label>
+                                    </div>
+                                    <div class="col-6" style="text-align: left">
+                                        <input id="aktuelleBaustellenOrt" class="text">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6" style="text-align: right">
+                                        <label>Strasse:</label>
+                                    </div>
+                                    <div class="col-6" style="text-align: left">
+                                        <input id="aktuelleBaustellenStrasse" class="text">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="row">
+                                    <div class="col-6" style="text-align: right">
+                                        <label>PLZ:</label>
+                                    </div>
+                                    <div class="col-6" style="text-align: left">
+                                        <input id="aktuelleBaustellenPlz" class="text">
+                                    </div>
+                                </div>
+                                <div class="row" rowspan="2">
+                                    <div class="col-6" style="text-align: right">
+                                        <label>Bemerkungen:</label>
+                                    </div>
+                                    <div class="col-6" style="text-align: left">
+                                        <textarea id="aktuelleBaustellenBemerkungen" class="text" ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+                    </div> 
+                    
+                    <div id="baustelleineinsaetzeTabelle" style="display: none;">
+                        <table class="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Datum</th>
+                              <th>Taetigkeit</th>
+                              <th>Stunden</th>
+                              <th>Mitarbeiter</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr id="empty">
+                              <td>
+                                  <input onKeyUp="checkSaveDiasableFunction($(this));" type="text" class="datepicker" style="display:none">
+                                  <div id="datum_empty" contentEditable="true" class="date"></div></td>
+                              <td>
+                                  <textarea class="requiredFieldForTeaetigkeit" onMouseUp="checkSaveDiasableFunction($(this));" onKeyUp="checkSaveDiasableFunction($(this));" id="taetigkeit_empty" type="text"></textarea>
+                                </td>
+                              <td>
+                                <input onKeyUp="checkSaveDiasableFunction($(this));" id="stunden_empty" class="requiredFieldForTeaetigkeit" type="number" pattern="([0-9]{2,3}).([0-9]{0,2})" step="0.5" value="8">
+                             </td>
+                                <td>
+                                    <textarea id="mitarbeiter_empty" type="text"></textarea>
+                                </td>
+                                <td class="actions">
+                                    <button id="baustellentatigkeitAnlegen" type="button" class="btn btn-primary requiredCheck" disabled="true">speichern</button>
+                                </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="baustelleAnlegenModal" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Stunden</h5>
+              </div>
+              <div class="modal-body">
+                  <div class="container">
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <label>Name:</label>
+                        </div>
+                        <div class="col-3">
+                            <input id="neuerBaustellenName" class="text" contentEditable="true">
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <label>PLZ:</label>
+                        </div>
+                        <div class="col-3">
+                            <input id="neuerBaustellenPlz" class="text" contentEditable="true">
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <label>Ort:</label>
+                        </div>
+                        <div class="col-3">
+                            <input id="neuerBaustellenOrt" class="text" contentEditable="true">
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <label>Strasse:</label>
+                        </div>
+                        <div class="col-3">
+                            <input id="neuerBaustellenStrasse" class="text">
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div class="col-3">
+                            <label>Bemerkungen:</label>
+                        </div>
+                        <div class="col-3">
+                            <textarea id="neuerBaustellenBemerkungen" class="text" ></textarea>
+                        </div>
+                        <div class="col-3"></div>
+                    </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="neueBaustelleSpeichern" type="button" class="btn btn-primary" onclick="neueBaustelleSpeichernF();" data-dismiss="modal" disabled="true">speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="formular" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Stunden</h5>
+              </div>
+              <div class="modal-body" id="forularmodalBoddy">
+   
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-warning" onclick="drucken();" data-dismiss="modal">drucken</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script src="stundenerfassungClient.js"></script>
+    </body>
+</html>

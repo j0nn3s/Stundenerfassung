@@ -1,0 +1,59 @@
+button {
+    margin: 5px;
+}
+#baustellenButtons {
+    flex-flow: row-reverse;
+}
+
+.container{
+    max-width: 100%;
+    width: 100%;
+}
+
+#empty{
+    background-color: lightblue;
+}
+
+.navbar-date-div{taetigkeit_empty
+    margin-left: 5px;
+    margin-right: 5px;
+    background-color: white;
+}
+
+.navbar-direct{
+    flex-direction: row-reverse;
+}
+
+.max{
+    width: 100%;
+}
+
+.myColBack {
+    margin-left: 5px;
+    text-align: left;
+}
+
+textarea {
+    min-height: 150px;
+    resize: both;
+}
+
+
+.card-body {
+    padding: 0px;
+}
+
+.stundenCol , .stundenM, .stundenS{
+    margin-left: 5px;
+    padding-top: 5px;
+    width: 150px;
+}
+
+.schaefer {
+    padding-left: 10px;
+    margin-right: 146px;
+}
+
+.formlabel {
+	font-size: 18px;
+}
