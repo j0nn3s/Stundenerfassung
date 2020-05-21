@@ -12,6 +12,7 @@ class S(BaseHTTPRequestHandler):
     def _set_responsePost(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
     def do_GET(self):
@@ -77,6 +78,8 @@ class S(BaseHTTPRequestHandler):
         if(self.path == '/deleteMitarbeiterMitId'):
             id = database.deleteMitarbeiterMitId((json.loads(post_data)))
             self.wfile.write(format(json.dumps(id)).encode('utf-8'))
+        if(self.path == '/getAlleBaustellenMitTaetigkeiten'):
+            self.wfile.write(format(json.dumps(database.getAlleBaustellenMitTaetigkeiten())).encode('utf-8'))
         if(self.path == '/waehleJahr'):
             database.waehleJahr((json.loads(post_data)))
             self.wfile.write(format(json.dumps(database.getAlleBaustellen())).encode('utf-8'))

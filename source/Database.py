@@ -158,3 +158,24 @@ class Database():
     def deleteMitarbeiterMitId(self, id):
         self.mitarbeiter.remove(Query()['id'] == id['id'])
         return id
+    def getAlleBaustellenMitTaetigkeiten(self):
+        alleEinsaetze = self.baustelleneinsatz.all()
+        alleEinsaetzelist = alleEinsaetze.copy()
+        for einsatz in alleEinsaetzelist:
+            einsatzMitarbeiter = einsatz['mitarbeiter']
+            for mitarbeiter in einsatzMitarbeiter:
+                mitarbeiter['name'] = self.mitarbeiter.search(Query()['id'] == mitarbeiter['id'])[0]['name']
+        alleBaustellen = self.baustelle.all()
+        alleRelevantenBaustellen = []
+        for baustelle in alleBaustellen:
+            baustellentaetigkeiten = []
+            arrayEinsaetze = alleEinsaetze.copy()
+            for taetigkeit in arrayEinsaetze:
+                if taetigkeit['baustellenid'] == baustelle['id']:
+                    baustellentaetigkeiten.append(taetigkeit)
+                    alleEinsaetze.remove(taetigkeit)
+            if baustellentaetigkeiten:
+                baustelle['taetigkeiten'] = baustellentaetigkeiten
+                alleRelevantenBaustellen.append(baustelle)
+
+        return alleRelevantenBaustellen

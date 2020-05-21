@@ -1,0 +1,20 @@
+.baustellen-card{
+    flex-direction: column;
+    background-color: lightblue;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 15px;
+    cursor: pointer;
+    -moz-osx-font-smoothing: grayscale;
+    backface-visibility: hidden;
+    transform: translate(0);
+    transition: transform 0.25s ease-out;
+}
+
+.baustellen-card:hover{
+    transform: scale(1.05);
+}
+
+.left-text-align{
+    text-align: left;
+}
