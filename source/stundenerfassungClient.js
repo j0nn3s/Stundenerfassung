@@ -1,16 +1,17 @@
 /*setze aktuelles datum*/
 var today = new Date();
 var dd = String(today.getDate()).padStart(2, '0');
-var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+var mm = String(today.getMonth() + 1).padStart(2, '0'); //today.getMonth() January is 0!
 var yyyy = today.getFullYear();
 
-today = dd + '-' + mm + '-' + yyyy;
+var today = dd + '-' + mm + '-' + yyyy;
+var firstOfMonth = '01' + '-' + mm + '-' + yyyy;
 
-aktuelleBaustellenID = '';
-aktuelleTaetigkeiten=[];
-baustellenDaten=[];
-mitarbeiterDaten=[];
-aktuelleBaustelleDaten={};
+var aktuelleBaustellenID = '';
+var aktuelleTaetigkeiten=[];
+var baustellenDaten=[];
+var mitarbeiterDaten=[];
+var aktuelleBaustelleDaten={};
 
 cleanModalFormular = function(){
     $('#forularmodalBoddy').html('');
@@ -21,7 +22,7 @@ loaddatepicker = function() {
     $('#yearDate').val(yyyy);
     $("#datum_empty").text(today);
     $("#datum_empty_datepicker").val(today);
-    $('#datum_Von_druck').text(today);
+    $('#datum_Von_druck').text(firstOfMonth);
     $('#datum_Bis_druck').text(today);
     $('.datepicker').on('change', function() {
         $(this).parent().children('.date').html($(this).val());
@@ -91,55 +92,78 @@ $('#baustelleineinsaetzeTabelle').on('click', '.baustellentatigkeitloeschen',fun
             rerenderTaetigkeiten();
         });
 });
-fillFormularVonBis = function () {
+fillFormularVonBis = function (alleBaustellen) {
     vonVal = $('#datum_Von_druck').text();
-    if(vonVal == ''){
+    if(vonVal === ''){
       vonVal = '01-01-2000';  
     }
     bisVal = $('#datum_Bis_druck').text();
-    if(bisVal == ''){
+    if(bisVal === ''){
       bisVal = '31-12-3000';  
     }
     $.post("getBaustellenEinsatzVonBis",
         '{"von": "' + vonVal + '", "bis": "' + bisVal + '"}',
     function (data, status) {
-          renderBaustelleFormular(data);  
+        if(alleBaustellen){
+            if(data.length !== 0){
+                renderBaustelleFormular(data);  
+            } else {
+                renderBaustelleFormular(null);  
+            }
+            
+        } else {
+            var istKeineBaustelle = true;
+            for (baustellenItemN in data){
+                baustellenItem = data[baustellenItemN];
+                if(aktuelleBaustellenID === baustellenItem.id){
+                    renderBaustelleFormular([baustellenItem]);
+                    istKeineBaustelle = false;
+                }
+            } 
+            if(istKeineBaustelle){
+                renderBaustelleFormular(null);
+            }
+        }
     });
 };
 
 renderBaustelleFormular = function(data){
     cleanModalFormular();
-    renderer = '<div class="container">';
-    for (baustelleNum in data){
-        baustelle = data[baustelleNum];
-        if(baustelle != undefined){
-            renderer = renderer + '<div class="row"><div class="col-md-auto"><h1>' + baustelle['name'] + '</h1></div><div class="col"></div></div>';
-            renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">Ort:</label></div><div class="col myColLabelBack"><label class="formlabel">' + baustelle['ort'] + '</label></div><div class="col"></div></div>';
-            renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">PLZ:</label></div><div class="col myColLabelBack"><label class="formlabel">' + baustelle['plz'] + '</label></div><div class="col"></div></div>';
-            renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">Strasse:</label></div><div class="col-md-auto"><label class="formlabel">' + baustelle['strasse'] + '</label></div><div class="col"></div></div>';
-            taetigkeitenArray = baustelle['taetigkeiten'];
-            sortResults(taetigkeitenArray, 'datum', true);
-            if(taetigkeitenArray.length > 1){
-                renderer = renderer + '<div class="row"><div class="col"><h2>Tätigkeiten</h2></div><div class="col"></div></div>';
-            } else {
-                renderer = renderer + '<div class="row"><div class="col"><h2>Tätigkeit</h2></div><div class="col"></div></div>';    
-            }
-            renderer = renderer + '<div class="row"></div>';
-            for (tat in taetigkeitenArray){
-                taetigkeit = baustelle['taetigkeiten'][tat];
-                renderer = renderer + '<div class="row"><div class="col-3"><label class="formlabel">' + taetigkeit['datum'] + '</label></div><div class="col-9"><div class="row"><label class="formlabel">' + taetigkeit['taetigkeit'].replace(/\n/g, "<br />") + '</label></div>';
-                for(mitarbeiterN in taetigkeit['mitarbeiter']){
-                    mitarbeiter = taetigkeit['mitarbeiter'][mitarbeiterN];
-                    renderer = renderer + '<div class="row"><div class="col-6"><label class="formlabel">' + mitarbeiter['name'] + '</label></div><div class="col-6"><label class="formlabel">' + mitarbeiter['stunden'].toFixed(1) + ' Stunden</label></div></div>';
+    if(data !== null){
+        renderer = '<div class="container">';
+        for (baustelleNum in data){
+            baustelle = data[baustelleNum];
+            if(baustelle != undefined){
+                renderer = renderer + '<div class="row"><div class="col-md-auto"><h1>' + baustelle['name'] + '</h1></div><div class="col"></div></div>';
+                renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">Ort:</label></div><div class="col myColLabelBack"><label class="formlabel">' + baustelle['ort'] + '</label></div><div class="col"></div></div>';
+                renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">PLZ:</label></div><div class="col myColLabelBack"><label class="formlabel">' + baustelle['plz'] + '</label></div><div class="col"></div></div>';
+                renderer = renderer + '<div class="row"><div class="col-2 myColLabelFront"><label class="formlabel">Strasse:</label></div><div class="col-md-auto"><label class="formlabel">' + baustelle['strasse'] + '</label></div><div class="col"></div></div>';
+                taetigkeitenArray = baustelle['taetigkeiten'];
+                sortDateResults(taetigkeitenArray, 'datum', true);
+                if(taetigkeitenArray.length > 1){
+                    renderer = renderer + '<div class="row"><div class="col"><h2>Tätigkeiten</h2></div><div class="col"></div></div>';
+                } else {
+                    renderer = renderer + '<div class="row"><div class="col"><h2>Tätigkeit</h2></div><div class="col"></div></div>';    
                 }
-                
-                renderer = renderer + '<div class="row"><div class="col-6"><label class="formlabel">Schäfer</label></div><div class="col-6"><label class="formlabel">' + taetigkeit['stunden'].toFixed(1) + ' Stunden</label></div></div></div></div>';  
-            }   
-            renderer = renderer + '</div>'; 
+                renderer = renderer + '<div class="row"></div>';
+                for (tat in taetigkeitenArray){
+                    taetigkeit = baustelle['taetigkeiten'][tat];
+                    renderer = renderer + '<div class="row"><div class="col-3"><label class="formlabel">' + taetigkeit['datum'] + '</label></div><div class="col-9"><div class="row"><label class="formlabel">' + taetigkeit['taetigkeit'].replace(/\n/g, "<br />") + '</label></div>';
+                    for(mitarbeiterN in taetigkeit['mitarbeiter']){
+                        mitarbeiter = taetigkeit['mitarbeiter'][mitarbeiterN];
+                        renderer = renderer + '<div class="row"><div class="col-6"><label class="formlabel">' + mitarbeiter['name'] + '</label></div><div class="col-6"><label class="formlabel">' + mitarbeiter['stunden'].toFixed(1) + ' Stunden</label></div></div>';
+                    }
+                    
+                    renderer = renderer + '<div class="row"><div class="col-6"><label class="formlabel">Schäfer</label></div><div class="col-6"><label class="formlabel">' + taetigkeit['stunden'].toFixed(1) + ' Stunden</label></div></div></div></div>';  
+                }   
+                renderer = renderer + '</div>'; 
+            }
         }
+        renderer = renderer + '</div>';
+        $('#forularmodalBoddy').append(renderer);
+    } else {
+        $('#forularmodalBoddy').append('<div>keine Buastelle für diesen filter verfügbar. Zeitraum prüfen</div>');
     }
-    renderer = renderer + '</div>';
-    $('#forularmodalBoddy').append(renderer);
 }
 
 getBaustelleWithid = function(){
@@ -425,7 +449,7 @@ baustellenUpdateF = function() {
 };
 
 rerenderTaetigkeiten = function(highlightedId){
-    sortResults(aktuelleTaetigkeiten, 'datum', true);
+    sortDateResults(aktuelleTaetigkeiten, 'datum', true);
     $('.baustellentaetigkeitsklasse').remove();
     for (number in aktuelleTaetigkeiten){
         baustelle = aktuelleTaetigkeiten[number]
@@ -449,6 +473,34 @@ sortResults = function(array, prop, asc) {
             return (a[prop] > b[prop]) ? 1 : ((a[prop] < b[prop]) ? -1 : 0);
         } else {
             return (b[prop] > a[prop]) ? 1 : ((b[prop] < a[prop]) ? -1 : 0);
+        }
+    });
+}
+sortDateResults = function(array, prop, asc) {
+    //asc = false;
+    array.sort(function(a, b) {
+        if (asc) {
+            var aDate = new Date();
+            aDate.setDate(a[prop].substring(0,1));
+            aDate.setMonth(a[prop].substring(3,4));
+            aDate.setFullYear(a[prop].substring(6));
+            var bDate = new Date();
+            bDate.setDate(a[prop].substring(0,1));
+            bDate.setMonth(a[prop].substring(3,4));
+            bDate.setFullYear(a[prop].substring(6));
+            return aDate < bDate ? 1 : aDate > bDate ? -1 : 0;
+            /*
+            return (int(a[prop].substring(3,4)) > int(b[prop].substring(3,4))) ?
+                1 : 
+                ((int(a[prop].substring(3,4)) < int(b[prop].substring(3,4))) ?
+                    -1 : 
+                    ((int(a[prop].substring(0,1)) > int(b[prop].substring(0,1))) ?
+                        1 : 
+                        ((int(a[prop].substring(0,1)) < int(b[prop].substring(0,1))) ?
+                            -1 :
+                            0)));*/
+        } else {
+            return (b[prop].substring(3,4)) > a[prop].substring(3,4) ? 1 : (b[prop].substring(3,4) < a[prop].substring(3,4)) ? -1 : sortResults([a,b],"datum",false);
         }
     });
 }
@@ -504,12 +556,8 @@ getStunden = function(){
         $.post("getStundenMonat",
             '{"monat":' +  letzterMonat + '}',
             function (data, status) {
-                if(data['stunden'] != 0){
-                    $('#letzterMonatStunden').text(data['stunden']);
-                    $('.letzterMonatStunden').show();                    
-                } else {
-                    $('.letzterMonatStunden').hide();    
-                }
+                $('#letzterMonatStunden').text(data['stunden']);
+                $('.letzterMonatStunden').show();                    
         });    
     } else{
         $('.letzterMonatStunden').hide();

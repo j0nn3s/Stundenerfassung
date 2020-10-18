@@ -34,7 +34,7 @@
                             <div id="datum_Bis_druck" contentEditable="true" class="date navbar-date-div"></div>
                         </div>
                         <div>
-                            <button class="btn btn-outline-warning my-2 my-sm-0" onclick="fillFormularVonBis();$('#formular').modal('toggle');">drucken</button>
+                            <button class="btn btn-outline-warning my-2 my-sm-0" onclick="fillFormularVonBis(true);$('#formular').modal('toggle');">drucken</button>
                         </div>
                    </div>
                 </nav>
@@ -93,7 +93,7 @@
                         <div class="col-3">
                             <div class="row" id="baustellenButtons" style="display: none">
                                 <button class="btn btn-danger" onclick="$('#wirklichloeschen').modal('toggle');">löschen</button>
-                                <button class="btn btn-warning" onclick="$('#formular').modal('toggle');">drucken</button>
+                                <button class="btn btn-warning" onclick="fillFormularVonBis(false);$('#formular').modal('toggle');">drucken</button>
                                 <button id="aktuelleBaustelleUpdaten" class="btn btn-primary" onclick="baustellenUpdateF();">speichern</button>
                             </div>
                         </div>
