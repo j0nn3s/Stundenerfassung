@@ -479,28 +479,20 @@ sortResults = function(array, prop, asc) {
 sortDateResults = function(array, prop, asc) {
     //asc = false;
     array.sort(function(a, b) {
+        var aDate = new Date();
+        var aArray = a[prop].split('-');
+        aDate.setDate(aArray[0]);
+        aDate.setMonth(aArray[1]);
+        aDate.setFullYear(aArray[2]);
+        var bDate = new Date();
+        var bArray = b[prop].split('-');
+        bDate.setDate(bArray[0]);
+        bDate.setMonth(bArray[1]);
+        bDate.setFullYear(bArray[2]);
         if (asc) {
-            var aDate = new Date();
-            aDate.setDate(a[prop].substring(0,1));
-            aDate.setMonth(a[prop].substring(3,4));
-            aDate.setFullYear(a[prop].substring(6));
-            var bDate = new Date();
-            bDate.setDate(a[prop].substring(0,1));
-            bDate.setMonth(a[prop].substring(3,4));
-            bDate.setFullYear(a[prop].substring(6));
-            return aDate < bDate ? 1 : aDate > bDate ? -1 : 0;
-            /*
-            return (int(a[prop].substring(3,4)) > int(b[prop].substring(3,4))) ?
-                1 : 
-                ((int(a[prop].substring(3,4)) < int(b[prop].substring(3,4))) ?
-                    -1 : 
-                    ((int(a[prop].substring(0,1)) > int(b[prop].substring(0,1))) ?
-                        1 : 
-                        ((int(a[prop].substring(0,1)) < int(b[prop].substring(0,1))) ?
-                            -1 :
-                            0)));*/
+            return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
         } else {
-            return (b[prop].substring(3,4)) > a[prop].substring(3,4) ? 1 : (b[prop].substring(3,4) < a[prop].substring(3,4)) ? -1 : sortResults([a,b],"datum",false);
+            return aDate < bDate ? 1 : aDate > bDate ? -1 : 0;
         }
     });
 }
